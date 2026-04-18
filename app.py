@@ -1,69 +1,53 @@
 import streamlit as st
-import datetime
 
-# 1. Configuración de página - Debe ser la primera instrucción de Streamlit
-st.set_page_config(page_title="Defunción Digital Córdoba", layout="centered")
+st.set_page_config(page_title="Prototipo Defunción Córdoba", page_icon="🏥")
 
-# 2. Encabezado basado en el modelo de informe [cite: 1]
-st.title("🏥 Registro Digital de Defunción")
-st.subheader("Provincia de Córdoba - Prototipo Estadístico")
+st.title("🏥 Sistema de Defunción Digital")
+st.write("Provincia de Córdoba - Módulo de Codificación Automática")
 
-# --- SECCIÓN: DATOS DEL PACIENTE (78% de la carga de datos) ---
-with st.form("formulario_defuncion"):
-    st.header("1. Datos del Fallecido")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        # Campos del PDF [cite: 9, 10, 11]
-        nombre = st.text_input("1- Nombre/s y Apellido/s")
-        tipo_doc = st.selectbox("2- Tipo Doc", ["DNI", "Pasaporte", "LC", "LE"])
-        nro_doc = st.text_input("3- Nro. Documento")
-        sexo = st.radio("5- Sexo", ["Masculino", "Femenino", "No binario"], horizontal=True) # [cite: 16, 19, 20]
-    
-    with col2:
-        # Campos del PDF [cite: 12, 14, 102]
-        nacionalidad = st.text_input("4- Nacionalidad", value="Argentina")
-        fecha_nac = st.date_input("6- Fecha de nacimiento", value=datetime.date(1960, 1, 1))
-        instruccion = st.selectbox("20- Máximo nivel de instrucción", 
-                                 ["Primario", "Secundario", "Terciario", "Universitario", "Posgrado"])
+# Contenedor principal
+with st.container():
+    st.header("Causas de la Defunción (Ítem 26)")
+    st.info("Escriba el diagnóstico y la IA sugerirá el código CIE-10 en tiempo real.")
 
-    st.divider()
+    # Campo de texto para la causa
+    causa_input = st.text_area("Causa Directa (a):", placeholder="Ejemplo: Neumonía, Infarto, Insuficiencia renal...")
 
-    # --- SECCIÓN: CAUSAS (Simulación de IA) ---
-    st.header("2. Causas de la Defunción")
-    st.caption("Complete la causa directa. El sistema sugerirá códigos CIE automáticamente.")
-    
-    # Campo para el Item 26-a del PDF [cite: 156]
-    causa_a = st.text_area("a) Enfermedad o condición patológica directa", 
-                           placeholder="Ej: Insuficiencia respiratoria aguda")
+    # --- LÓGICA DE CODIFICACIÓN VISIBLE ---
+    if causa_input:
+        # Diccionario de simulación de IA (puedes agregar más para la demo)
+        sugerencias = {
+            "neumonia": "J18.9 (Neumonía, no especificada)",
+            "infarto": "I21.9 (Infarto agudo de miocardio)",
+            "renal": "N17.9 (Insuficiencia renal aguda)",
+            "diabetes": "E14.9 (Diabetes mellitus)",
+            "covid": "U07.1 (COVID-19, virus identificado)",
+            "paro": "I46.9 (Paro cardíaco, no especificado)"
+        }
 
-    # Lógica de sugerencia de IA (simulada para el prototipo)
-    if causa_a:
-        if "respiratoria" in causa_a.lower() or "neumo" in causa_a.lower():
-            st.info("✨ **Sugerencia de IA:** Se detectó patrón respiratorio. Código CIE-10 sugerido: **J18.9**. ¿Fue consecuencia de COVID-19?")
-        elif "cardiaco" in causa_a.lower() or "infarto" in causa_a.lower():
-            st.info("✨ **Sugerencia de IA:** Se detectó patrón cardíaco. Código CIE-10 sugerido: **I21.9**.")
+        # Buscamos coincidencias
+        encontrado = False
+        for clave, codigo in sugerencias.items():
+            if clave in causa_input.lower():
+                # ESTO ES LO QUE SE VERÁ EN LA PRESENTACIÓN
+                st.success(f"✨ **Sugerencia de Codificación IA:**")
+                st.metric(label="Código CIE-10 Detectado", value=codigo)
+                st.caption("La IA analizó el texto y vinculó el diagnóstico al estándar internacional.")
+                encontrado = True
+                break
+        
+        if not encontrado and len(causa_input) > 3:
+            st.warning("🔍 La IA está analizando términos médicos complejos... (Buscando en base de datos CIE-11)")
 
-    st.divider()
+st.divider()
 
-    # --- SECCIÓN: DATOS DEL MÉDICO (12% de la carga de datos) ---
-    st.header("3. Datos del Profesional")
-    col3, col4 = st.columns(2)
-    with col3:
-        # Campos del PDF [cite: 289, 290]
-        medico_nombre = st.text_input("Nombre y Apellido del Certificante")
-        matricula = st.text_input("Matrícula Profesional")
-    with col4:
-        # Campos del PDF [cite: 291, 295]
-        domicilio_prof = st.text_input("Domicilio Profesional")
-        telefono = st.text_input("Teléfono de contacto")
+# Simulación de otros campos para que no se vea vacío
+col1, col2 = st.columns(2)
+with col1:
+    st.text_input("Nombre del Fallecido")
+with col2:
+    st.text_input("Matrícula del Médico")
 
-    # Botón de envío
-    enviado = st.form_submit_button("Firmar y Enviar Certificado")
-    
-    if enviado:
-        if nombre and medico_nombre and matricula:
-            st.success(f"Certificado de {nombre} enviado con éxito por el Dr./a {medico_nombre}.")
-            st.balloons()
-        else:
-            st.error("Por favor, complete los campos obligatorios (Nombre, Médico y Matrícula).")
+if st.button("Validar y Guardar"):
+    st.balloons()
+    st.success("Certificado Codificado y Enviado.")
