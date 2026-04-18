@@ -1,0 +1,48 @@
+import streamlit as st
+
+# Configuración de la página
+st.set_page_config(page_title="Digitalización Defunción Córdoba", layout="wide")
+
+st.title("Prototipo: Registro Digital de Defunción (Córdoba)")
+st.info("Este formulario reemplaza el modelo de informe estadístico papel.")
+
+# --- SECCIÓN 1: DATOS DEL PACIENTE (78% de la carga) ---
+with st.expander("1. Información del Fallecido", expanded=True):
+    col1, col2 = st.columns(2)
+    with col1:
+        nombre = st.text_input("1- Nombre/s y Apellido/s")
+        tipo_doc = st.selectbox("2- Tipo Doc", ["DNI", "Pasaporte", "Otro"])
+        nro_doc = st.text_input("3- Nro. Doc")
+    with col2:
+        sexo = st.radio("5- Sexo", ["Masculino", "Femenino", "No binario"])
+        fecha_nac = st.date_input("6- Fecha de nacimiento")
+        nacionalidad = st.text_input("4- Nacionalidad", value="Argentina")
+
+# --- SECCIÓN 2: CAUSAS DE DEFUNCIÓN (Automatización con IA) ---
+st.subheader("26- CAUSA DE LA DEFUNCIÓN")
+st.write("Complete las causas. Use el botón de IA para normalizar diagnósticos (CIE-11).")
+
+causa_a = st.text_area("a) Enfermedad o condición directa", placeholder="Ej: Insuficiencia respiratoria aguda")
+
+if st.button("✨ Sugerir Diagnóstico e Intervalo (IA)"):
+    # Aquí se integraría la llamada a la API de IA
+    st.success("Sugerencia de IA: Basado en 'Insuficiencia respiratoria', se sugiere verificar Neumonía o EPOC como causa antecedente.")
+    st.caption("Código CIE-11 Sugerido: CA45.0")
+
+causa_b = st.text_input("b) Debido a (antecedente)")
+intervalo = st.text_input("Intervalo aproximado (ej: 48 horas)")
+
+# --- SECCIÓN 3: DATOS DEL MÉDICO (12% de la carga) ---
+with st.sidebar:
+    st.header("Datos del Profesional")
+    medico_nombre = st.text_input("Nombre y Apellido del Profesional")
+    matricula = st.text_input("Número de Matrícula")
+    prof_domicilio = st.text_input("Domicilio profesional")
+    
+    if st.button("Finalizar y Firmar Digitalmente"):
+        st.warning("Se requiere validación de firma digital de CiDi.")
+
+# Botón de Guardado
+if st.button("Enviar a Registro Civil"):
+    st.balloons()
+    st.success("Certificado enviado exitosamente para validación administrativa.")
