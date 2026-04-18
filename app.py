@@ -1,125 +1,127 @@
 import streamlit as st
 import datetime
 
-# Configuración institucional
-st.set_page_config(page_title="Registro Digital de Defunción - Córdoba", page_icon="⚖️", layout="wide")
+# Configuración de página
+st.set_page_config(page_title="Sistema Digital de Defunción - Córdoba", layout="wide", page_icon="⚖️")
 
-# CSS para un diseño más limpio
-st.markdown("""
-    <style>
-    .main { background-color: #f5f7f9; }
-    .stExpander { border: 1px solid #d1d1d1; border-radius: 10px; background-color: white; }
-    </style>
-    """, unsafe_allow_html=True)
-
-st.title("⚖️ Informe Estadístico de Defunción Digital")
-st.caption("Gobierno de la Provincia de Córdoba - Ministerio de Salud")
-
-# --- BLOQUE 1: DATOS ADMINISTRATIVOS ---
-with st.expander("📂 I. DATOS DEL REGISTRO (Items 2-8)", expanded=False):
-    c_adm1, c_adm2, c_adm3 = st.columns(3)
-    with c_adm1:
-        st.text_input("Departamento / Partido")
-        st.text_input("Delegación / Registro Civil")
-    with c_adm2:
-        st.text_input("Nro. Acta")
-        st.text_input("Tomo / Folio")
-    with c_adm3:
-        st.date_input("Fecha de Inscripción")
-
-# --- BLOQUE 2: IDENTIFICACIÓN DEL FALLECIDO ---
-with st.expander("👤 II. DATOS DEL FALLECIDO", expanded=True):
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        nombre = st.text_input("1- Apellido/s y Nombre/s")
-        doc_nro = st.text_input("3- Nro. Documento")
-        sexo_bio = st.radio("5- Sexo biológico", ["Masculino", "Femenino", "No binario"], horizontal=True)
-    with c2:
-        nacionalidad = st.text_input("4- Nacionalidad", value="Argentina")
-        f_nac = st.date_input("6- Fecha de Nacimiento", value=datetime.date(1970, 1, 1))
-        id_genero = st.selectbox("17- Identidad de Género", ["Varón", "Mujer", "Mujer Trans / Travesti", "Varón Trans", "No binario", "Otra"])
-    with c3:
-        est_civil = st.selectbox("18- Estado Civil", ["Soltero/a", "Casado/a", "Viudo/a", "Divorciado/a", "Unión conviviente"])
-        pueblos_orig = st.checkbox("19- Pertenece a pueblos originarios")
-
-    st.markdown("---")
-    st.markdown("**Contexto Socio-Económico**")
-    c4, c5 = st.columns(2)
-    with c4:
-        st.selectbox("20- Nivel de Instrucción", ["Primario", "Secundario", "Terciario/Univ.", "Nunca asistió"])
-        st.selectbox("21- Condición de actividad", ["Trabajó", "Buscó trabajo", "Jubilado/Pensionado", "Quehaceres del hogar"])
-    with c5:
-        st.text_input("22- Ocupación habitual")
-        st.text_input("10- Domicilio Real (Calle, Nro, Localidad)")
-
-# --- BLOQUE 3: EL HECHO (DEFUNCION) ---
-with st.expander("📍 III. DATOS DEL FALLECIMIENTO"):
-    f1, f2, f3 = st.columns(3)
-    with f1:
-        f_def = st.date_input("11- Fecha de defunción")
-        h_def = st.time_input("12- Hora de defunción")
-    with f2:
-        lugar = st.selectbox("13- Lugar de ocurrencia", ["Establ. Salud", "Vivienda", "Vía pública", "Cárcel", "Otro"])
-    with f3:
-        atencion_medica = st.radio("36- ¿Tuvo atención médica?", ["Sí", "No", "Se desconoce"])
-
-# --- BLOQUE 4: CAUSAS Y IA ---
-st.markdown("---")
-st.header("🩺 IV. CAUSAS DE MUERTE (Certificación Médica)")
-st.info("La IA sugiere códigos CIE-10 para asegurar la calidad estadística.")
-
-c_ia1, c_ia2 = st.columns([2, 1])
-with c_ia1:
-    causa_a = st.text_area("Causa Directa (a)", placeholder="Ej: Insuficiencia respiratoria aguda")
-    causa_b = st.text_input("Debido a (b)")
-    causa_c = st.text_input("Debido a (c)")
-
-# Lógica de sugerencia (Base de datos ampliada)
-cie_db = {
-    "neumonia": "J18.9", "infarto": "I21.9", "sepsis": "A41.9", "covid": "U07.1", 
-    "diabetes": "E14.9", "acv": "I64", "falla multiorganica": "R68.8", "cancer": "C80",
-    "renal": "N17.9", "insuficiencia cardiaca": "I50.9"
+# --- BASE DE DATOS EXPANDIDA CIE-10 (50 CÓDIGOS) ---
+CIE10_DB = {
+    # CARDIOVASCULARES
+    "INFARTO AGUDO DE MIOCARDIO": "I21.9", "INSUFICIENCIA CARDIACA": "I50.9", 
+    "ACCIDENTE CEREBROVASCULAR (ACV)": "I64", "HIPERTENSION ARTERIAL": "I10",
+    "SHOCK CARDIOGENICO": "R57.0", "ARRITMIA VENTRICULAR": "I47.2",
+    "ANEURISMA DE AORTA": "I71.9", "EMBOLIA PULMONAR": "I26.9",
+    "PARO CARDIORRESPIRATORIO": "I46.9", "MIOCARDITIS": "I40.9",
+    # RESPIRATORIAS
+    "NEUMONIA": "J18.9", "EPOC (ENFERMEDAD PULMONAR OBSTRUCTIVA)": "J44.9",
+    "INSUFICIENCIA RESPIRATORIA AGUDA": "J96.0", "ASMA BRONQUIAL": "J45.9",
+    "EDEMA AGUDO DE PULMON": "J81", "BRONQUITIS CRONICA": "J42",
+    "COVID-19": "U07.1", "GRIPE / INFLUENZA": "J11.1",
+    # TUMORES / CÁNCER
+    "CANCER DE PULMON": "C34.9", "CANCER DE MAMA": "C50.9", 
+    "CANCER DE COLON": "C18.9", "CANCER DE PROSTATA": "C61",
+    "CANCER DE PANCREAS": "C25.9", "CANCER DE ESTOMAGO": "C16.9",
+    "LEUCEMIA LINFOIDE": "C91.9", "LINFOMA NO HODGKIN": "C85.9",
+    "TUMOR CEREBRAL": "C71.9", "CANCER DE HIGADO": "C22.0",
+    # INFECCIOSAS Y OTROS
+    "SEPSIS / SEPTICEMIA": "A41.9", "SHOCK SEPTICO": "A41.9",
+    "DIABETES MELLITUS TIPO 2": "E11.9", "CIRROSIS HEPATICA": "K74.6",
+    "INSUFICIENCIA RENAL AGUDA": "N17.9", "INSUFICIENCIA RENAL CRONICA": "N18.9",
+    "MENINGITIS BACTERIANA": "G00.9", "TUBERCULOSIS PULMONAR": "A15.0",
+    "HIV / SIDA": "B24", "DENGUE GRAVE": "A91",
+    "ALZHEIMER": "G30.9", "DEMENCIA SENIL": "F03",
+    # CAUSAS EXTERNAS / TRAUMAS
+    "TRAUMATISMO CRANEOENCEFALICO (TCE)": "S06.9", "POLITRAUMATISMO": "T07",
+    "HERIDA POR ARMA DE FUEGO": "W34", "HERIDA POR ARMA BLANCA": "W26",
+    "INTOXICACION POR MONOXIDO DE CARBONO": "T58", "AHOGAMIENTO": "W74",
+    "QUEMADURAS GRAVES": "T30.0", "ASFIXIA MECANICA": "W84",
+    "CAIDA DE ALTURA": "W19", "SINCOPE": "R55"
 }
 
-with c_ia2:
-    if causa_a:
-        match = next((v for k, v in cie_db.items() if k in causa_a.lower()), None)
-        if match:
-            st.metric("CIE-10 Sugerido", match)
-            st.success("Validado por sistema")
-        else:
-            st.warning("Código no automatizado")
+# Mantener la causa seleccionada en la sesión
+if 'causa_seleccionada' not in st.session_state:
+    st.session_state['causa_seleccionada'] = ""
 
-# --- BLOQUE 5: CASOS ESPECIALES (Causa Externa y Materna) ---
-with st.expander("⚠️ V. CIRCUNSTANCIAS ESPECIALES"):
-    st.markdown("**37- Manera de morir**")
-    manera = st.selectbox("Seleccione opción", ["Enfermedad", "Accidente", "Suicidio", "Homicidio", "Intervención Legal", "Investigación"])
-    
-    if manera != "Enfermedad":
-        st.text_area("40- Describa brevemente cómo se produjo la lesión")
+st.title("⚖️ Registro Digital de Defunción - Córdoba")
+st.info("Formulario completo adaptado al formato digital (Ítems 1-43)")
 
-    st.markdown("---")
-    st.markdown("**42- Si fue mujer: ¿Estaba embarazada, de parto o puerperio?**")
-    st.radio("Opciones materna", ["No", "Sí, en el embarazo", "Sí, en el parto", "Sí, hasta 42 días después", "Se desconoce"], horizontal=True)
+# --- SECCIÓN 1: DATOS DEL REGISTRO ---
+with st.expander("📂 I. DATOS DEL REGISTRO CIVIL"):
+    c_reg = st.columns(4)
+    c_reg[0].text_input("Dpto/Partido")
+    c_reg[1].text_input("Delegación")
+    c_reg[2].text_input("Acta Nro")
+    c_reg[3].date_input("Fecha Inscripción")
 
-# --- BLOQUE 6: MÉDICO ---
-with st.expander("🖋️ VI. DATOS DEL PROFESIONAL"):
-    m1, m2 = st.columns(2)
-    with m1:
-        st.text_input("Nombre y Apellido del Médico")
-        st.text_input("Matrícula")
-    with m2:
-        st.selectbox("Fuente de información", ["Historia clínica", "Pruebas de laboratorio", "Interrogatorio a familiares"])
+# --- SECCIÓN 2: DATOS DEL FALLECIDO ---
+with st.expander("👤 II. DATOS DEL FALLECIDO", expanded=True):
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        nombre = st.text_input("1- Apellidos y Nombres")
+        doc = st.text_input("3- Nro de Documento")
+        sexo = st.radio("5- Sexo", ["Masculino", "Femenino", "No binario"], horizontal=True)
+    with col2:
+        f_nac = st.date_input("6- Fecha Nacimiento", value=datetime.date(1960,1,1))
+        st.selectbox("17- Identidad de Género", ["Varón", "Mujer", "Trans", "No binario", "Otro"])
+        st.selectbox("20- Nivel Instrucción", ["Primario", "Secundario", "Terciario/Univ.", "Sin instrucción"])
+    with col3:
+        st.text_input("8- Domicilio Legal")
+        st.text_input("10- Domicilio Real")
+        st.text_input("22- Ocupación habitual")
 
-# --- BOTÓN FINAL ---
+# --- SECCIÓN 3: EL HECHO ---
+with st.expander("📍 III. LUGAR DE LA DEFUNCIÓN"):
+    c_hecho = st.columns(3)
+    c_hecho[0].date_input("11- Fecha Defunción")
+    c_hecho[1].time_input("12- Hora Defunción")
+    c_hecho[2].selectbox("13- Lugar", ["Salud Pública", "Privado", "Vivienda", "Vía Pública", "Otro"])
+    st.text_input("15- Dirección Exacta del Hecho (Calle, Nro, Localidad)")
+
+# --- SECCIÓN 4: CAUSAS Y BUSCADOR CIE-10 ---
 st.markdown("---")
-if st.button("CONFIRMAR Y FINALIZAR REGISTRO"):
-    if nombre and causa_a:
-        st.markdown("""
-            <div style="background-color: #e8f4f8; border-left: 5px solid #2c3e50; padding: 20px;">
-                <h3 style="color: #2c3e50; margin: 0;">✅ CERTIFICADO REGISTRADO</h3>
-                <p>El acta digital ha sido procesada con éxito y enviada al servidor central del Registro Civil de Córdoba.</p>
-            </div>
-        """, unsafe_allow_html=True)
+st.header("🩺 IV. CERTIFICACIÓN MÉDICA")
+st.write("Escriba para buscar entre los 50 diagnósticos precargados:")
+
+busqueda = st.text_input("🔍 BUSCADOR DE DIAGNÓSTICOS (Ej: ACV, Cancer, Infarto...)", "").upper()
+
+if busqueda:
+    matches = {k: v for k, v in CIE10_DB.items() if busqueda in k}
+    if matches:
+        st.write("Sugerencias encontradas:")
+        for diag, cod in matches.items():
+            if st.button(f"Seleccionar: {cod} - {diag}"):
+                st.session_state['causa_seleccionada'] = f"{cod} - {diag}"
     else:
-        st.error("Por favor, complete al menos el nombre del fallecido y la causa de muerte.")
+        st.warning("No se encontraron coincidencias exactas.")
+
+# Campos de causas (Ítem 26)
+c_causas = st.columns([2, 1])
+with c_causas[0]:
+    st.text_area("26- a) Causa Directa", value=st.session_state['causa_seleccionada'])
+    st.text_input("26- b) Debido a")
+    st.text_area("27- Otros estados significativos")
+with c_causas[1]:
+    st.selectbox("35- Determinación", ["Historia Clínica", "Autopsia", "Laboratorio"])
+    st.radio("36- ¿Atención médica?", ["Sí", "No", "Se desconoce"])
+
+# --- SECCIÓN 5: CASOS ESPECIALES ---
+with st.expander("⚠️ V. CAUSAS EXTERNAS / MENORES / MATERNA"):
+    st.selectbox("37- Manera de morir", ["Enfermedad", "Accidente", "Suicidio", "Homicidio", "Investigación"])
+    st.markdown("**Si es menor de 1 año:**")
+    c_min = st.columns(2)
+    c_min[0].number_input("28- Peso al nacer (grs)", 0)
+    c_min[1].number_input("29- Semanas gestación", 0)
+
+# --- SECCIÓN 6: MÉDICO ---
+with st.expander("🖋️ VI. DATOS DEL PROFESIONAL"):
+    c_med = st.columns(2)
+    c_med[0].text_input("Nombre del Médico")
+    c_med[1].text_input("Matrícula (M.P.)")
+
+# --- FINALIZAR ---
+if st.button("CONFIRMAR Y CERRAR CERTIFICADO"):
+    if nombre and st.session_state['causa_seleccionada']:
+        st.success("✅ CERTIFICADO CONFIRMADO Y CODIFICADO")
+        st.info(f"Fallecido: {nombre} | Código CIE-10: {st.session_state['causa_seleccionada']}")
+    else:
+        st.error("Faltan datos críticos para el registro.")
