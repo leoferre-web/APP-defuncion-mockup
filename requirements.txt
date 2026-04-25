@@ -1,4 +1,4 @@
 streamlit
 fpdf
-st_supabase_connection
+st-supabase-connection
 certifi
