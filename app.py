@@ -10,7 +10,10 @@ from email import encoders
 from supabase import create_client, Client
 
 # --- CONFIGURACIÓN DE PÁGINA ---
-st.set_page_config(page_title="Sistema de Defunción Digital - Córdoba", layout="wide", page_icon="⚖️")
+st.set_page_config(page_title="Sistema de Defunción Digital - Córdoba", layout="centered", page_icon="⚖️")
+
+# URL RAW del logo en tu GitHub
+URL_LOGO = "https://raw.githubusercontent.com/leoferre-web/APP-defuncion-mockup/main/logo.png"
 
 # --- CONEXIÓN A SUPABASE ---
 @st.cache_resource
@@ -25,7 +28,7 @@ supabase = conectar_supabase()
 DB_RENAPER = {"123": {"nombre": "JUAN PEREZ", "domicilio": "AV. COLON 1234, CORDOBA"}}
 DB_REFES = {"12345": "DR. CARLOS MEDICINA (MATRÍCULA ACTIVA)"}
 
-# CATÁLOGO DE 50 CÓDIGOS CIE-10
+# CATÁLOGO COMPLETO DE 50 CÓDIGOS CIE-10
 CIE10_DB = {
     "INFARTO AGUDO DE MIOCARDIO": "I21.9", "INSUFICIENCIA CARDIACA": "I50.9", 
     "ACCIDENTE CEREBROVASCULAR (ACV)": "I64", "HIPERTENSION ARTERIAL": "I10",
@@ -49,15 +52,14 @@ CIE10_DB = {
     "SENILIDAD / VEJEZ": "R54", "EMBARAZO ECTOPICO": "O00.9"
 }
 
-# Inicialización de estados de sesión
+# Session States
 if 'causa_seleccionada' not in st.session_state:
     st.session_state['causa_seleccionada'] = ""
 if 'proceso_exitoso' not in st.session_state:
     st.session_state['proceso_exitoso'] = False
 
-# --- FUNCIÓN PARA REINICIAR FORMULARIO ---
 def reiniciar_formulario():
-    for key in st.session_state.keys():
+    for key in list(st.session_state.keys()):
         del st.session_state[key]
     st.rerun()
 
@@ -79,7 +81,6 @@ class CertificadoPDF(FPDF):
         self.set_font('Arial', '', 9)
         self.multi_cell(0, 7, str(valor), 0, 'L')
 
-# --- FUNCIÓN DE ENVÍO DE CORREO ---
 def enviar_correo(dest, pdf_content, nombre):
     try:
         remitente = st.secrets["email"]["remitente"]
@@ -105,15 +106,23 @@ def enviar_correo(dest, pdf_content, nombre):
         return False
 
 # --- INTERFAZ ---
-st.title("⚖️ Sistema de Defunción Digital Córdoba")
 
-# VENTANA DE ÉXITO (Si se cargó correctamente)
+# Encabezado Estilizado
+col_l, col_t = st.columns([1, 3])
+with col_l:
+    st.image(URL_LOGO, width=150)
+with col_t:
+    st.markdown("<h1 style='margin-bottom: 0;'>Ministerio de Salud</h1>", unsafe_allow_html=True)
+    st.markdown("<h3 style='margin-top: 0; color: #007bff;'>Gobierno de la Provincia de Córdoba</h3>", unsafe_allow_html=True)
+
+st.divider()
+
 if st.session_state['proceso_exitoso']:
     st.success("✅ Certificado generado con éxito")
     st.info("Los datos han sido guardados en la base de datos y el PDF ha sido enviado al correo especificado.")
-    if st.button("CARGAR NUEVO CERTIFICADO"):
+    if st.button("CARGAR NUEVO CERTIFICADO", use_container_width=True):
         reiniciar_formulario()
-    st.stop() # Detiene el resto de la app para mostrar solo el mensaje de éxito
+    st.stop()
 
 # BLOQUE I: REGISTRO
 with st.expander("📂 I. DATOS DEL REGISTRO"):
@@ -125,7 +134,7 @@ with st.expander("📂 I. DATOS DEL REGISTRO"):
 
 # BLOQUE II: FALLECIDO
 with st.expander("👤 II. DATOS DEL FALLECIDO", expanded=True):
-    dni_f = st.text_input("3- Nro de Documento (Pruebe con '123')")
+    dni_f = st.text_input("3- Nro de Documento (Validación RENAPER)")
     nombre_defecto, domicilio_defecto = "", ""
     if dni_f in DB_RENAPER:
         with st.spinner("Consultando RENAPER..."):
@@ -150,12 +159,12 @@ with st.expander("👤 II. DATOS DEL FALLECIDO", expanded=True):
         edad_str = f"{e_meses}m {e_dias}d {e_horas}h {e_minutos}min"
         e_anios = 0
     else:
-        e_anios = st.number_input("Años cumplidos", 1, 120)
+        e_anios = st.number_input("Años cumplidos", 1, 120, value=70)
         edad_str = f"{e_anios} años"
 
-    id_gen = st.selectbox("17- Identidad de Género", ["Mujer trans/travesti", "Varón trans", "Mujer", "Varón", "Ninguna", "Ignorado"])
+    id_gen = st.selectbox("17- Identidad de Género", ["Mujer", "Varón", "Mujer trans/travesti", "Varón trans", "Ninguna", "Ignorado"])
     pueblo = st.radio("18- ¿Pueblo originario?", ["No", "Si", "Se ignora"], horizontal=True)
-    instruccion = st.selectbox("20- Máximo nivel instrucción", ["Nunca asistió", "Primario Comp", "Secundario Comp", "Terciario/Univ Comp", "Se ignora"])
+    instruccion = st.selectbox("20- Máximo nivel instrucción", ["Secundario Comp", "Universitario Comp", "Terciario Comp", "Nunca asistió", "Primario Comp", "Se ignora"])
 
 # BLOQUE III: SOCIO-ECONÓMICO
 sit_lab, ocupacion = "N/A", "N/A"
@@ -169,20 +178,22 @@ with st.expander("🩺 IV. CAUSAS DE LA DEFUNCIÓN"):
     forma_m = st.radio("23- Forma de morir", ["No traumática", "Traumática"], horizontal=True)
     enfer_inf = st.radio("24- ¿Enfermedad infectocontagiosa?", ["No", "Si"]) if forma_m == "No traumática" else "N/A"
     
-    busc_cie = st.text_input("🔍 BUSCADOR CIE-10 (Ej: 'INFARTO', 'COVID')").upper()
+    busc_cie = st.text_input("🔍 BUSCADOR CIE-10 (Ej: 'INFARTO', 'COVID', 'ACCIDENTE')").upper()
     if busc_cie:
         sugerencias = {d: c for d, c in CIE10_DB.items() if busc_cie in d}
         if sugerencias:
             st.write(f"Resultados encontrados ({len(sugerencias)}):")
-            cols = st.columns(2)
+            cols_cie = st.columns(2)
             for i, (desc, cod) in enumerate(sugerencias.items()):
                 if i < 10:
-                    if cols[i % 2].button(f"📌 {cod} - {desc}", use_container_width=True, key=desc):
+                    if cols_cie[i % 2].button(f"📌 {cod} - {desc}", use_container_width=True, key=desc):
                         st.session_state['causa_seleccionada'] = f"{cod} - {desc}"
                         st.rerun()
     
     causa_a = st.text_area("26- a) Causa Directa", value=st.session_state['causa_seleccionada'])
-    causa_b, otros_est, intervalo = st.text_input("b) Debido a"), st.text_area("II) Otros estados patológicos"), st.text_input("Intervalo enfermedad-muerte")
+    causa_b = st.text_input("b) Debido a")
+    otros_est = st.text_area("II) Otros estados patológicos")
+    intervalo = st.text_input("Intervalo enfermedad-muerte")
 
 # BLOQUE V: ESPECIALES
 with st.expander("⚠️ V. SITUACIONES ESPECIALES"):
@@ -193,15 +204,20 @@ with st.expander("⚠️ V. SITUACIONES ESPECIALES"):
     atencion = st.radio("36- ¿Tuvo atención médica?", ["Si", "No", "Se desconoce"])
 
 # BLOQUE VI: CAUSAS EXTERNAS
-with st.expander("🏎️ VI. CAUSAS EXTERNAS"):
-    manera = st.selectbox("37- Manera de morir", ["Enfermedad", "Accidente", "Suicidio", "Agresión", "Investigación", "No pudo determinarse"])
-    desc_lesion, lugar_ext = st.text_area("40- Describa cómo ocurrió"), st.selectbox("41- Lugar donde ocurrió", ["Vivienda", "Institución", "Vía pública", "Trabajo", "Otro"])
+if forma_m == "Traumática":
+    with st.expander("🏎️ VI. CAUSAS EXTERNAS"):
+        manera = st.selectbox("37- Manera de morir", ["Accidente", "Suicidio", "Agresión", "Investigación", "No pudo determinarse"])
+        desc_lesion = st.text_area("40- Describa cómo ocurrió")
+        lugar_ext = st.selectbox("41- Lugar donde ocurrió", ["Vivienda", "Institución", "Vía pública", "Trabajo", "Otro"])
+else:
+    manera, desc_lesion, lugar_ext = "N/A", "N/A", "N/A"
 
 # BLOQUE VII: MENOR 1 AÑO
 peso, semanas = 0, 0
 if es_menor:
     with st.expander("👶 VII. MENOR DE 1 AÑO"):
-        peso, semanas = st.number_input("42- Peso al nacer (gramos)", 0), st.number_input("43- Semanas de embarazo", 0)
+        peso = st.number_input("42- Peso al nacer (gramos)", 0)
+        semanas = st.number_input("43- Semanas de embarazo", 0)
 
 # BLOQUE VIII: MÉDICO
 with st.expander("🖋️ VIII. PROFESIONAL", expanded=True):
@@ -217,10 +233,13 @@ with st.expander("🖋️ VIII. PROFESIONAL", expanded=True):
         st.error("❌ Matrícula no válida.")
 
     nom_m = col_m2.text_input("Nombre Médico", value=nom_m_defecto)
-    email_dest, firma_digital = st.text_input("Email para recibir el PDF"), st.checkbox("Firma Digital (CiDi Córdoba)")
+    email_dest = st.text_input("Email para recibir el PDF")
+    firma_digital = st.checkbox("Firma Digital (CiDi Córdoba)")
+
+st.divider()
 
 # --- BOTÓN DE GENERACIÓN Y GUARDADO ---
-if st.button("CONFIRMAR Y ENVIAR CERTIFICADO COMPLETO"):
+if st.button("🔴 CONFIRMAR Y ENVIAR REGISTRO OFICIAL", use_container_width=True):
     if nombre_f and causa_a and firma_digital and email_dest and nom_m:
         with st.spinner("Registrando en la nube..."):
             datos_registro = {
@@ -242,7 +261,7 @@ if st.button("CONFIRMAR Y ENVIAR CERTIFICADO COMPLETO"):
                 pdf.add_page()
                 pdf.seccion("DATOS DEL FALLECIDO")
                 pdf.item("1", "Nombre", nombre_f); pdf.item("3", "DNI", dni_f); pdf.item("16", "Edad", edad_str)
-                pdf.seccion("CAUSAS"); pdf.item("26-a", "Causa", causa_a)
+                pdf.seccion("CAUSAS"); pdf.item("26-a", "Causa Directa", causa_a)
                 pdf.seccion("PROFESIONAL"); pdf.item("M", "Médico", f"{nom_m} MP: {mat_m}")
                 pdf_bytes = pdf.output(dest='S').encode('latin-1')
                 
@@ -252,4 +271,4 @@ if st.button("CONFIRMAR Y ENVIAR CERTIFICADO COMPLETO"):
             except Exception as e:
                 st.error(f"Error: {e}")
     else:
-        st.error("⚠️ Verifique los datos obligatorios y la firma.")
+        st.error("⚠️ Verifique los datos obligatorios, la validación médica y la firma digital.")
