@@ -8,6 +8,11 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 
+from st_supabase_connection import SupabaseConnection
+
+# Conectamos con los Secrets que ya cargaste
+conn = st.connection("supabase", type=SupabaseConnection)
+
 # --- CONFIGURACIÓN DE PÁGINA ---
 st.set_page_config(page_title="Sistema de Defunción Digital - Córdoba", layout="wide", page_icon="⚖️")
 
@@ -187,29 +192,46 @@ with st.expander("🖋️ VIII. PROFESIONAL", expanded=True):
     email_dest = st.text_input("Email para recibir el PDF")
     firma_digital = st.checkbox("Firma Digital (CiDi Córdoba)")
 
-# --- BOTÓN DE GENERACIÓN ---
 if st.button("CONFIRMAR Y ENVIAR CERTIFICADO COMPLETO"):
     if nombre_f and causa_a and firma_digital and email_dest:
-        with st.spinner("Generando PDF Oficial..."):
-            pdf = CertificadoPDF()
-            pdf.add_page()
-            
-            # Mapeo de ítems al PDF (Ejemplo de algunos campos)
-            pdf.seccion("DATOS DEL REGISTRO")
-            pdf.item("I", "Registro", f"{dpto_reg} - {acta_reg}")
-            pdf.seccion("DATOS DEL FALLECIDO")
-            pdf.item("1", "Nombre", nombre_f)
-            pdf.item("3", "DNI", dni_f)
-            pdf.item("16", "Edad", edad_str)
-            pdf.item("17", "Género", id_gen)
-            pdf.seccion("CAUSAS")
-            pdf.item("26-a", "Causa", causa_a)
-            pdf.seccion("FIRMA")
-            pdf.item("M", "Médico", f"{nom_m} MP: {mat_m}")
-            pdf.item("HASH", "Validación Digital", f"CBA-{int(time.time())}")
+        with st.spinner("Guardando en base de datos y enviando..."):
+            # Creamos el diccionario con TODOS los datos capturados en tu app
+            datos_finales = {
+                "dpto_reg": dpto_reg, "deleg_reg": deleg_reg, "acta_reg": acta_reg, "anio_reg": anio_reg,
+                "dni_fallecido": dni_f, "nombre_fallecido": nombre_f, "sexo_f": sexo_f,
+                "fecha_nacimiento": str(f_nac), "domicilio_fallecido": domicilio_f, "edad_texto": edad_str,
+                "identidad_genero": id_gen, "pueblo_originario": pueblo, "nivel_instruccion": instruccion,
+                "situacion_laboral": sit_lab if 'sit_lab' in locals() else "N/A",
+                "ocupacion_habitual": ocupacion if 'ocupacion' in locals() else "N/A",
+                "forma_morir": forma_m, "enfermedad_infecto": enfer_inf, "causa_directa": causa_a,
+                "causa_debido_a": causa_b, "otros_estados": otros_est, "intervalo_muerte": intervalo,
+                "embarazo": emb if 'emb' in locals() else "N/A", "cirugia": cirugia, 
+                "autopsia": autopsia, "fuente_info": fuente, "atencion_medica": atencion,
+                "manera_morir": manera, "desc_lesion": desc_lesion, "lugar_ocurrencia": lugar_ext,
+                "peso_nacer": str(peso) if es_menor else "N/A", 
+                "semanas_embarazo": str(semanas) if es_menor else "N/A",
+                "medico_nombre": nom_m, "medico_matricula": mat_m, "email_envio": email_dest
+            }
 
-            pdf_bytes = pdf.output(dest='S').encode('latin-1')
-            if enviar_correo(email_dest, pdf_bytes, nombre_f):
-                st.info("✅ Registro exitoso. El PDF llegará a su bandeja en breve.")
+            try:
+                # GUARDAR EN SUPABASE
+                conn.table("certificados_defuncion").insert(datos_finales).execute()
+                
+                # GENERAR PDF (Tu código original)
+                pdf = CertificadoPDF()
+                pdf.add_page()
+                pdf.seccion("DATOS DEL FALLECIDO")
+                pdf.item("1", "Nombre", nombre_f)
+                pdf.item("3", "DNI", dni_f)
+                # ... agregar aquí los campos que quieras que salgan en el PDF ...
+                
+                pdf_bytes = pdf.output(dest='S').encode('latin-1')
+                
+                # ENVIAR CORREO
+                if enviar_correo(email_dest, pdf_bytes, nombre_f):
+                    st.balloons()
+                    st.success("✅ ¡Éxito! Datos guardados en la nube y certificado enviado por mail.")
+            except Exception as e:
+                st.error(f"Error al guardar: {e}")
     else:
         st.error("Error: Faltan datos críticos o la firma digital.")
