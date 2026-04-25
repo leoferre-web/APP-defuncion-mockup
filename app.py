@@ -21,14 +21,32 @@ def conectar_supabase():
 
 supabase = conectar_supabase()
 
-# --- SIMULACIÓN DE BASES DE DATOS ---
+# --- BASES DE DATOS DE VALIDACIÓN (Simuladas) ---
 DB_RENAPER = {"123": {"nombre": "JUAN PEREZ", "domicilio": "AV. COLON 1234, CORDOBA"}}
 DB_REFES = {"12345": "DR. CARLOS MEDICINA (MATRÍCULA ACTIVA)"}
 
+# CATÁLOGO DE 50 CÓDIGOS CIE-10
 CIE10_DB = {
     "INFARTO AGUDO DE MIOCARDIO": "I21.9", "INSUFICIENCIA CARDIACA": "I50.9", 
-    "ACCIDENTE CEREBROVASCULAR (ACV)": "I64", "NEUMONIA": "J18.9", 
-    "COVID-19": "U07.1", "CANCER DE PULMON": "C34.9", "SEPSIS": "A41.9"
+    "ACCIDENTE CEREBROVASCULAR (ACV)": "I64", "HIPERTENSION ARTERIAL": "I10",
+    "SHOCK CARDIOGENICO": "R57.0", "EMBOLIA PULMONAR": "I26.9", "ARRITMIA CARDIACA": "I49.9",
+    "ANEURISMA DE AORTA": "I71.9", "NEUMONIA": "J18.9", "EPOC": "J44.9", 
+    "COVID-19": "U07.1", "ASMA": "J45.9", "INSUFICIENCIA RESPIRATORIA": "J96.0", 
+    "EDEMA PULMONAR": "J81", "BRONQUITIS AGUDA": "J20.9", "SEPSIS": "A41.9", 
+    "SHOCK SEPTICO": "A41.9", "TUBERCULOSIS": "A15.0", "HIV/SIDA": "B24", 
+    "DENGUE GRAVE": "A91", "MENINGITIS": "G03.9", "INFECCION URINARIA (UROPSEPSIS)": "N39.0",
+    "CANCER DE PULMON": "C34.9", "CANCER DE COLON": "C18.9", "CANCER DE MAMA": "C50.9", 
+    "CANCER DE PROSTATA": "C61", "LEUCEMIA": "C91.9", "CANCER DE PANCREAS": "C25.9",
+    "CANCER DE ESTOMAGO": "C16.9", "LINFOMA": "C85.9", "DIABETES TIPO 2": "E11.9", 
+    "INSUFICIENCIA RENAL CRONICA": "N18.9", "CIRROSIS HEPATICA": "K74.6", 
+    "CETOACIDOSIS DIABETICA": "E11.1", "INSUFICIENCIA HEPATICA": "K72.9",
+    "TRAUMATISMO CRANEOENCEFALICO": "S06.9", "HERIDA POR ARMA DE FUEGO": "W34", 
+    "POLITRAUMATISMO": "T07", "AHOGAMIENTO": "W74", "ASFIXIA MECANICA": "W84", 
+    "INTOXICACION POR MONOXIDO DE CARBONO": "T58", "QUEMADURAS GRAVES": "T30.0", 
+    "CAIDA DE ALTURA": "W19", "ACCIDENTE DE TRANSITO": "V89.2", "SUICIDIO": "X84",
+    "ALZHEIMER": "G30.9", "DEMENCIA SENIL": "F03", "PARKINSON": "G20",
+    "MUERTE SUBITA INFANTIL": "R95", "PARO CARDIORRESPIRATORIO NO ESPECIFICADO": "I46.9",
+    "SENILIDAD / VEJEZ": "R54", "EMBARAZO ECTOPICO": "O00.9"
 }
 
 if 'causa_seleccionada' not in st.session_state:
@@ -77,7 +95,7 @@ def enviar_correo(dest, pdf_content, nombre):
         st.error(f"Error en el envío de mail: {e}")
         return False
 
-# --- INTERFAZ DE USUARIO ---
+# --- INTERFAZ ---
 st.title("⚖️ Sistema de Defunción Digital Córdoba")
 
 # BLOQUE I: REGISTRO
@@ -90,10 +108,18 @@ with st.expander("📂 I. DATOS DEL REGISTRO"):
 
 # BLOQUE II: FALLECIDO
 with st.expander("👤 II. DATOS DEL FALLECIDO", expanded=True):
-    dni_f = st.text_input("3- Nro de Documento")
-    nombre_defecto = DB_RENAPER[dni_f]['nombre'] if dni_f in DB_RENAPER else ""
-    domicilio_defecto = DB_RENAPER[dni_f]['domicilio'] if dni_f in DB_RENAPER else ""
+    dni_f = st.text_input("3- Nro de Documento (Pruebe con '123')")
+    nombre_defecto, domicilio_defecto = "", ""
     
+    if dni_f in DB_RENAPER:
+        with st.spinner("Consultando RENAPER..."):
+            time.sleep(0.5)
+            st.success(f"✅ Identidad Validada: {DB_RENAPER[dni_f]['nombre']}")
+            nombre_defecto = DB_RENAPER[dni_f]['nombre']
+            domicilio_defecto = DB_RENAPER[dni_f]['domicilio']
+    elif dni_f:
+        st.warning("⚠️ DNI no encontrado. Complete manualmente.")
+
     nombre_f = st.text_input("1- Apellido/s y Nombre/s", value=nombre_defecto)
     c_f1, c_f2 = st.columns(2)
     sexo_f = c_f1.radio("5- Sexo", ["Masculino", "Femenino", "No binario"], horizontal=True)
@@ -103,10 +129,8 @@ with st.expander("👤 II. DATOS DEL FALLECIDO", expanded=True):
     es_menor = st.checkbox("¿Es menor de 1 año?")
     if es_menor:
         em1, em2, em3, em4 = st.columns(4)
-        e_meses = em1.number_input("Meses", 0, 11)
-        e_dias = em2.number_input("Días", 0, 30)
-        e_horas = em3.number_input("Horas", 0, 23)
-        e_minutos = em4.number_input("Minutos", 0, 59)
+        e_meses, e_dias = em1.number_input("Meses", 0, 11), em2.number_input("Días", 0, 30)
+        e_horas, e_minutos = em3.number_input("Horas", 0, 23), em4.number_input("Minutos", 0, 59)
         edad_str = f"{e_meses}m {e_dias}d {e_horas}h {e_minutos}min"
         e_anios = 0
     else:
@@ -129,11 +153,17 @@ with st.expander("🩺 IV. CAUSAS DE LA DEFUNCIÓN"):
     forma_m = st.radio("23- Forma de morir", ["No traumática", "Traumática"], horizontal=True)
     enfer_inf = st.radio("24- ¿Enfermedad infectocontagiosa?", ["No", "Si"]) if forma_m == "No traumática" else "N/A"
     
-    busc_cie = st.text_input("🔍 BUSCADOR CIE-10").upper()
+    busc_cie = st.text_input("🔍 BUSCADOR CIE-10 (Ej: 'INFARTO', 'COVID', 'ACCIDENTE')").upper()
     if busc_cie:
-        for d, c in CIE10_DB.items():
-            if busc_cie in d:
-                if st.button(f"Asignar {c}"): st.session_state['causa_seleccionada'] = f"{c} - {d}"
+        sugerencias = {d: c for d, c in CIE10_DB.items() if busc_cie in d}
+        if sugerencias:
+            st.write(f"Resultados encontrados ({len(sugerencias)}):")
+            cols = st.columns(2)
+            for i, (desc, cod) in enumerate(sugerencias.items()):
+                if i < 10:
+                    if cols[i % 2].button(f"📌 {cod} - {desc}", use_container_width=True, key=desc):
+                        st.session_state['causa_seleccionada'] = f"{cod} - {desc}"
+                        st.rerun()
     
     causa_a = st.text_area("26- a) Causa Directa", value=st.session_state['causa_seleccionada'])
     causa_b = st.text_input("b) Debido a")
@@ -164,17 +194,24 @@ if es_menor:
 # BLOQUE VIII: MÉDICO
 with st.expander("🖋️ VIII. PROFESIONAL", expanded=True):
     col_m1, col_m2 = st.columns(2)
-    mat_m = col_m1.text_input("Matrícula Profesional")
-    nom_m = col_m2.text_input("Nombre Médico")
+    mat_m = col_m1.text_input("Matrícula Profesional (Pruebe '12345')")
+    nom_m_defecto = ""
+    if mat_m in DB_REFES:
+        with st.spinner("Validando REFES..."):
+            time.sleep(0.5)
+            st.success(f"✅ {DB_REFES[mat_m]}")
+            nom_m_defecto = "DR. CARLOS MEDICINA"
+    elif mat_m:
+        st.error("❌ Matrícula no válida.")
+
+    nom_m = col_m2.text_input("Nombre Médico", value=nom_m_defecto)
     email_dest = st.text_input("Email para recibir el PDF")
     firma_digital = st.checkbox("Firma Digital (CiDi Córdoba)")
 
 # --- BOTÓN DE GENERACIÓN Y GUARDADO ---
 if st.button("CONFIRMAR Y ENVIAR CERTIFICADO COMPLETO"):
-    if nombre_f and causa_a and firma_digital and email_dest:
-        with st.spinner("Guardando en base de datos y generando PDF..."):
-            
-            # 1. Preparar datos para Supabase
+    if nombre_f and causa_a and firma_digital and email_dest and nom_m:
+        with st.spinner("Registrando en la nube..."):
             datos_registro = {
                 "dpto_reg": dpto_reg, "deleg_reg": deleg_reg, "acta_reg": acta_reg, "anio_reg": anio_reg,
                 "dni_fallecido": dni_f, "nombre_fallecido": nombre_f, "sexo_f": sexo_f,
@@ -188,27 +225,18 @@ if st.button("CONFIRMAR Y ENVIAR CERTIFICADO COMPLETO"):
                 "lugar_ocurrencia": lugar_ext, "peso_nacer": str(peso), "semanas_embarazo": str(semanas),
                 "medico_nombre": nom_m, "medico_matricula": mat_m, "email_envio": email_dest
             }
-
             try:
-                # 2. Guardar en Supabase
                 supabase.table("certificados_defuncion").insert(datos_registro).execute()
-                
-                # 3. Generar PDF
                 pdf = CertificadoPDF()
                 pdf.add_page()
                 pdf.seccion("DATOS DEL FALLECIDO")
-                pdf.item("1", "Nombre", nombre_f)
-                pdf.item("3", "DNI", dni_f)
-                pdf.item("26-a", "Causa", causa_a)
-                pdf.item("M", "Médico", f"{nom_m} MP: {mat_m}")
-                
+                pdf.item("1", "Nombre", nombre_f); pdf.item("3", "DNI", dni_f)
+                pdf.seccion("CAUSAS"); pdf.item("26-a", "Causa", causa_a)
+                pdf.seccion("PROFESIONAL"); pdf.item("M", "Médico", f"{nom_m} MP: {mat_m}")
                 pdf_bytes = pdf.output(dest='S').encode('latin-1')
-                
-                # 4. Enviar Correo
                 if enviar_correo(email_dest, pdf_bytes, nombre_f):
-                    st.balloons()
-                    st.success("✅ Registro guardado en la nube y correo enviado.")
+                    st.balloons(); st.success("✅ ¡Guardado en Supabase y correo enviado!")
             except Exception as e:
-                st.error(f"Error al procesar: {e}")
+                st.error(f"Error: {e}")
     else:
-        st.error("Faltan datos obligatorios o firma digital.")
+        st.error("⚠️ Verifique los datos obligatorios y la firma.")
