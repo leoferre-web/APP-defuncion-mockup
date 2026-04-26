@@ -81,7 +81,7 @@ def enviar_correo(dest, pdf_content, nombre):
         return False
 
 # =============================================================================
-# CSS GLOBAL — AJUSTE DE ESPACIADO SUPERIOR
+# CSS GLOBAL — MARGEN SUPERIOR EXTREMO
 # =============================================================================
 st.markdown("""
 <style>
@@ -104,15 +104,15 @@ html, body, .stApp {
 
 #MainMenu, footer { visibility: hidden; }
 
-/* SE BAJÓ EL CONTENIDO MÁS (8rem) */
-.block-container { padding-top: 8rem !important; max-width: 860px !important; }
+/* SE BAJÓ EL CONTENIDO AÚN MÁS (15rem) */
+.block-container { padding-top: 15rem !important; max-width: 860px !important; }
 
 /* ── HEADER ── */
 .cba-header {
     background: linear-gradient(135deg, #003366 0%, #1a4f8a 100%);
     border-bottom: 4px solid #c9a227;
     padding: 20px 28px;
-    margin: -8rem -1rem 0 -1rem; /* Ajustado para bajar con el padding */
+    margin: -15rem -1rem 0 -1rem; /* Sincronizado con el padding-top */
     display: flex; align-items: center; gap: 20px;
     box-shadow: 0 3px 14px rgba(0,0,0,0.22);
 }
