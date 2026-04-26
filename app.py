@@ -84,78 +84,53 @@ def enviar_correo(dest, pdf_content, nombre):
         return False
 
 # =============================================================================
-# CSS GLOBAL — ELIMINACIÓN DE BLOQUES NEGROS
+# CSS GLOBAL — CORRECCIÓN DE COLORES Y ENCABEZADO
 # =============================================================================
 st.markdown("""
 <style>
-/* Forzar fondo blanco en toda la app */
-.stApp {
-    background-color: #ffffff !important;
-}
+/* 1. Fondo general siempre blanco y eliminar barra negra superior */
+.stApp { background-color: white !important; }
+header { visibility: hidden !important; }
 
-/* Forzar fondo blanco y texto negro en todos los campos de entrada */
+/* 2. Forzar que todos los campos (inputs, textareas, selects) sean blancos con texto negro */
 input, textarea, div[data-baseweb="select"] > div, div[data-baseweb="base-input"] > div {
-    background-color: #ffffff !important;
-    color: #000000 !important;
-    border: 1px solid #cccccc !important;
+    background-color: white !important;
+    color: black !important;
+    border: 1px solid #ccc !important;
 }
 
-/* Forzar fondo blanco en los expanders */
-[data-testid="stExpander"] {
-    background-color: #ffffff !important;
-    border: 1px solid #000000 !important;
-}
-[data-testid="stExpander"] > details > summary {
-    background-color: #ffffff !important;
-    color: #000000 !important;
-}
-
-/* Etiquetas y textos siempre en negro */
-label p, .stWidget label p, div[data-testid="stMarkdownContainer"] p {
-    color: #000000 !important;
+/* 3. Forzar que todos los textos (labels, opciones de radio, parrafos) sean NEGROS */
+label p, .stWidget label p, div[data-testid="stMarkdownContainer"] p, span p {
+    color: black !important;
     opacity: 1 !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
 }
 
-/* Corregir visibilidad de opciones de radio */
-div[data-testid="stRadio"] label p {
-    color: #000000 !important;
-}
-
-/* Header */
+/* 4. Estilo del Encabezado (Restaurado sin barra negra) */
 .cba-header {
-    border-bottom: 2px solid #000000;
-    padding: 10px 0;
     display: flex;
     align-items: center;
     gap: 20px;
+    padding: 20px 0;
+    border-bottom: 2px solid #eee;
+    background-color: white !important;
 }
+.cba-header h1 { margin: 0; font-size: 24px; color: black !important; }
+.cba-header p { margin: 0; color: #444 !important; }
 
-/* Cuadro CiDi */
+/* 5. Cuadro de firma CiDi */
 .cidi-box {
-    border: 1px dashed #000000 !important;
-    background-color: #f9f9f9 !important;
+    border: 1px dashed black !important;
     padding: 15px;
-    color: #000000 !important;
-    font-weight: 700;
+    margin: 10px 0;
+    color: black !important;
+    background-color: #f9f9f9 !important;
 }
 
-/* Botones */
-.stButton > button {
-    background-color: #000000 !important;
-    color: #ffffff !important;
-}
-.btn-confirmar > div > button {
-    background-color: #cc0000 !important;
-    color: #ffffff !important;
-}
+/* 6. Botones */
+.stButton > button { background-color: #f0f0f0; color: black; border: 1px solid #ccc; }
+.btn-confirmar button { background-color: #cc0000 !important; color: white !important; font-weight: bold !important; }
 
-.badge-ok {
-    border: 1px solid #000000;
-    padding: 5px 10px;
-    font-weight: 700;
-    color: #000000;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -164,10 +139,10 @@ div[data-testid="stRadio"] label p {
 # =============================================================================
 st.markdown(f"""
 <div class="cba-header">
-    <div style="min-width:70px;"><img src="{URL_LOGO}" width="60"></div>
+    <img src="{URL_LOGO}" width="60">
     <div>
-        <h1 style="margin:0; color:black; font-size:24px;">Ministerio de Salud</h1>
-        <p style="margin:0; color:black;">Gobierno de la Provincia de Córdoba</p>
+        <h1>Ministerio de Salud</h1>
+        <p>Gobierno de la Provincia de Córdoba</p>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -193,11 +168,11 @@ with st.expander("👤 II. DATOS DEL FALLECIDO", expanded=True):
     
     if dni_f:
         if dni_f in DB_RENAPER:
-            st.markdown(f'<div class="badge-ok">VALIDADO: {DB_RENAPER[dni_f]["nombre"]}</div>', unsafe_allow_html=True)
+            st.markdown(f"**VALIDADO: {DB_RENAPER[dni_f]['nombre']}**")
             nombre_defecto = DB_RENAPER[dni_f]['nombre']
             domicilio_defecto = DB_RENAPER[dni_f]['domicilio']
         else:
-            st.warning("⚠️ DNI no encontrado en RENAPER. Complete manualmente.")
+            st.warning("⚠️ DNI no encontrado en RENAPER.")
     
     nombre_f = st.text_input("1- Apellidos y Nombres", value=nombre_defecto)
     c_f1, c_f2 = st.columns(2)
@@ -217,8 +192,7 @@ with st.expander("🩺 IV. CAUSAS DE LA DEFUNCIÓN"):
     forma_m = st.radio("23- Forma de morir", ["No traumática", "Traumática"], horizontal=True)
     causa_a = st.text_area("26- a) Causa Directa")
     intervalo = st.text_input("Intervalo enfermedad-muerte")
-    # OPCIÓN AUTOPSIA (Referencia imagen 1)
-    autopsia = st.radio("33- ¿Se solicitó autopsia?", ["No", "Si", "Se desconoce"], horizontal=False)
+    autopsia = st.radio("33- ¿Se solicitó autopsia?", ["No", "Si", "Se desconoce"])
 
 with st.expander("🖋️ VIII. PROFESIONAL", expanded=True):
     col_m1, col_m2 = st.columns(2)
@@ -227,7 +201,7 @@ with st.expander("🖋️ VIII. PROFESIONAL", expanded=True):
     
     if mat_m:
         if mat_m in DB_REFES:
-            st.markdown(f'<div class="badge-ok">MÉDICO VALIDADO: {DB_REFES[mat_m]}</div>', unsafe_allow_html=True)
+            st.markdown(f"**MÉDICO VALIDADO: {DB_REFES[mat_m]}**")
             nom_m_defecto = "DR. CARLOS MEDICINA"
         else:
             st.error("❌ Matrícula no encontrada en REFES.")
@@ -239,7 +213,7 @@ with st.expander("🖋️ VIII. PROFESIONAL", expanded=True):
     firma_digital = st.checkbox("Certifico la veracidad de los datos")
 
 st.markdown('<div class="btn-confirmar">', unsafe_allow_html=True)
-confirmar = st.button("🔴 CONFIRMAR Y ENVIAR REGISTRO OFICIAL", use_container_width=True)
+confirmar = st.button("CONFIRMAR Y ENVIAR REGISTRO OFICIAL", use_container_width=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
 # --- PROCESO ---
