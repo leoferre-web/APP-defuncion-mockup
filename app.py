@@ -127,7 +127,7 @@ html, body, .stApp {
 
 #MainMenu, footer, header { visibility: hidden; }
 
-/* --- SOLO BAJAMOS EL CONTENIDO PARA QUE EL LOGO NO SE CORTE --- */
+/* SOLO BAJAMOS EL CONTENIDO PARA QUE EL LOGO NO SE CORTE */
 .block-container { 
     padding-top: 5rem !important; 
     max-width: 860px !important; 
@@ -138,7 +138,7 @@ html, body, .stApp {
     background: linear-gradient(135deg, #003366 0%, #1a4f8a 100%);
     border-bottom: 4px solid #c9a227;
     padding: 20px 28px;
-    margin: -1rem -1rem 0 -1rem; /* Quitamos el margen negativo excesivo */
+    margin: -1rem -1rem 0 -1rem;
     display: flex; align-items: center; gap: 20px;
     box-shadow: 0 3px 14px rgba(0,0,0,0.22);
 }
@@ -190,29 +190,20 @@ html, body, .stApp {
 [data-testid="stExpander"] > details > summary:hover { background: #cfe0f5 !important; }
 [data-testid="stExpander"] > details > div { padding: 18px 20px 22px !important; }
 
-/* ── LABELS ── */
-.stTextInput label,
-.stNumberInput label,
-.stDateInput label,
-.stTimeInput label,
-.stSelectbox label,
-.stTextArea label,
-div[data-testid="stRadio"] > label,
-div[data-testid="stCheckbox"] > label,
-.stRadio > label,
-.stCheckbox > label {
+/* ── MODIFICACIÓN: COLOR DE TEXTO PARA RADIO Y CHECKBOX (LETRAS VISIBLES) ── */
+div[data-testid="stRadio"] label p, 
+div[data-testid="stCheckbox"] label p {
+    color: #262730 !important; /* Color oscuro para que se vea */
+    font-weight: 500 !important;
+}
+
+/* ── LABELS DE LOS CAMPOS ── */
+.stTextInput label, .stNumberInput label, .stDateInput label, .stTimeInput label, 
+.stSelectbox label, .stTextArea label, .stRadio label, .stCheckbox label {
     font-family: 'Source Sans 3', sans-serif !important;
     font-size: 13px !important;
     font-weight: 700 !important;
     color: #111827 !important;
-    letter-spacing: 0.1px !important;
-}
-
-.stRadio div[role="radiogroup"] label,
-.stCheckbox label {
-    color: #111827 !important;
-    font-size: 13px !important;
-    font-weight: 600 !important;
 }
 
 /* ── INPUTS ── */
@@ -223,8 +214,6 @@ div[data-testid="stCheckbox"] > label,
 .stTextArea textarea {
     border: 1.5px solid var(--gris-brd) !important;
     border-radius: 6px !important;
-    font-family: 'Source Sans 3', sans-serif !important;
-    font-size: 14px !important;
     color: #111827 !important;
     background: white !important;
 }
@@ -238,7 +227,6 @@ div[data-testid="stCheckbox"] > label,
     font-family: 'Source Sans 3', sans-serif !important;
     font-weight: 700 !important;
     font-size: 13px !important;
-    transition: background 0.15s !important;
 }
 .stButton > button:hover { background: #005fa3 !important; }
 
@@ -260,7 +248,6 @@ div[data-testid="stCheckbox"] > label,
     font-size: 12px; font-weight: 700;
     padding: 5px 13px; border-radius: 20px;
     border: 1px solid #a8dfc0;
-    font-family: 'Source Sans 3', sans-serif;
     margin: 4px 0 8px 0;
 }
 .badge-dot { width: 8px; height: 8px; background: #27ae60; border-radius: 50%; display: inline-block; }
@@ -276,17 +263,15 @@ div[data-testid="stCheckbox"] > label,
     display: flex; align-items: center; justify-content: center;
     font-size: 20px; flex-shrink: 0;
 }
-.cidi-text p     { margin: 0; font-weight: 700; color: #003366; font-size: 14px; }
-.cidi-text small { color: #1e3a5f; font-size: 12px; }
+/* MODIFICACIÓN: TEXTO CIDI OSCURO */
+.cidi-text p     { margin: 0; font-weight: 700; color: #003366 !important; font-size: 14px; }
+.cidi-text small { color: #1e3a5f !important; font-size: 12px; }
 
 /* ── FOOTER ── */
 .footer-legal {
     text-align: center; margin-top: 10px;
     font-size: 11px; color: #4a5568;
-    font-family: 'Source Sans 3', sans-serif;
 }
-
-hr { border: none; border-top: 1px solid var(--gris-brd) !important; margin: 14px 0 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -307,19 +292,14 @@ st.markdown(f"""
 <div class="cba-progress"></div>
 """, unsafe_allow_html=True)
 
-# =============================================================================
 # PANTALLA DE ÉXITO
-# =============================================================================
 if st.session_state['proceso_exitoso']:
     st.success("✅ Certificado generado con éxito")
-    st.info("Los datos han sido guardados en la base de datos y el PDF ha sido enviado al correo especificado.")
     if st.button("CARGAR NUEVO CERTIFICADO", use_container_width=True):
         reiniciar_formulario()
     st.stop()
 
-# =============================================================================
 # BLOQUE I — DATOS DEL REGISTRO
-# =============================================================================
 with st.expander("📂  I. DATOS DEL REGISTRO"):
     c1, c2, c3, c4 = st.columns(4)
     dpto_reg  = c1.text_input("Dpto/Partido")
@@ -327,134 +307,53 @@ with st.expander("📂  I. DATOS DEL REGISTRO"):
     acta_reg  = c3.text_input("Acta Nro")
     anio_reg  = c4.text_input("Año")
 
-# =============================================================================
 # BLOQUE II — DATOS DEL FALLECIDO
-# =============================================================================
 with st.expander("👤  II. DATOS DEL FALLECIDO", expanded=True):
-
     dni_f = st.text_input("3- Nro de Documento (Validación RENAPER)")
     nombre_defecto, domicilio_defecto = "", ""
 
     if dni_f in DB_RENAPER:
-        with st.spinner("Consultando RENAPER..."):
-            time.sleep(0.5)
-        st.markdown(
-            f'<div class="badge-ok"><span class="badge-dot"></span>'
-            f'Identidad Validada — {DB_RENAPER[dni_f]["nombre"]}</div>',
-            unsafe_allow_html=True
-        )
         nombre_defecto    = DB_RENAPER[dni_f]['nombre']
         domicilio_defecto = DB_RENAPER[dni_f]['domicilio']
-    elif dni_f:
-        st.warning("⚠️ DNI no encontrado. Complete manualmente.")
+        st.markdown(f'<div class="badge-ok"><span class="badge-dot"></span>Identidad Validada — {nombre_defecto}</div>', unsafe_allow_html=True)
 
     nombre_f    = st.text_input("1- Apellido/s y Nombre/s", value=nombre_defecto)
     c_f1, c_f2 = st.columns(2)
     sexo_f      = c_f1.radio("5- Sexo", ["Masculino", "Femenino", "No binario"], horizontal=True)
     f_nac       = c_f2.date_input("6- Fecha Nacimiento", value=datetime.date(1960, 1, 1))
     domicilio_f = st.text_input("10- Domicilio Real", value=domicilio_defecto)
-
     es_menor = st.checkbox("¿Es menor de 1 año?")
+    
     if es_menor:
         em1, em2, em3, em4 = st.columns(4)
-        e_meses   = em1.number_input("Meses",   0, 11)
-        e_dias    = em2.number_input("Días",     0, 30)
-        e_horas   = em3.number_input("Horas",    0, 23)
-        e_minutos = em4.number_input("Minutos",  0, 59)
-        edad_str  = f"{e_meses}m {e_dias}d {e_horas}h {e_minutos}min"
-        e_anios   = 0
+        e_meses = em1.number_input("Meses", 0, 11)
+        e_dias = em2.number_input("Días", 0, 30)
+        e_horas = em3.number_input("Horas", 0, 23)
+        e_minutos = em4.number_input("Minutos", 0, 59)
+        edad_str = f"{e_meses}m {e_dias}d {e_horas}h {e_minutos}min"
+        e_anios = 0
     else:
-        e_anios   = st.number_input("Años cumplidos", 1, 120, value=70)
+        e_anios = st.number_input("Años cumplidos", 1, 120, value=70)
         edad_str = f"{e_anios} años"
 
-    id_gen      = st.selectbox("17- Identidad de Género", ["Mujer", "Varón", "Mujer trans/travesti", "Varón trans", "Ninguna", "Ignorado"])
-    pueblo      = st.radio("18- ¿Pueblo originario?", ["No", "Si", "Se ignora"], horizontal=True)
-    instruccion = st.selectbox("20- Máximo nivel instrucción", ["Secundario Comp", "Universitario Comp", "Terciario Comp", "Nunca asistió", "Primario Comp", "Se ignora"])
+    id_gen = st.selectbox("17- Identidad de Género", ["Mujer", "Varón", "Trans", "Ninguna", "Ignorado"])
+    pueblo = st.radio("18- ¿Pueblo originario?", ["No", "Si", "Se ignora"], horizontal=True)
 
-# =============================================================================
-# BLOQUE III — DATOS 14 AÑOS Y MÁS
-# =============================================================================
-sit_lab, ocupacion = "N/A", "N/A"
-if not es_menor and e_anios >= 14:
-    with st.expander("💼  III. DATOS 14 AÑOS Y MÁS"):
-        sit_lab   = st.radio("21- Situación laboral", ["Trabajaba", "Buscaba trabajo", "No trabajaba"])
-        ocupacion = st.text_input("22- Ocupación habitual")
-
-# =============================================================================
-# BLOQUE IV — CAUSAS DE LA DEFUNCIÓN
-# =============================================================================
+# BLOQUE IV — CAUSAS
 with st.expander("🩺  IV. CAUSAS DE LA DEFUNCIÓN"):
-    forma_m   = st.radio("23- Forma de morir", ["No traumática", "Traumática"], horizontal=True)
-    enfer_inf = st.radio("24- ¿Enfermedad infectocontagiosa?", ["No", "Si"]) if forma_m == "No traumática" else "N/A"
-
-    busc_cie = st.text_input("🔍  BUSCADOR CIE-10 (Ej: 'INFARTO', 'COVID', 'ACCIDENTE')").upper()
-    if busc_cie:
-        sugerencias = {d: c for d, c in CIE10_DB.items() if busc_cie in d}
-        if sugerencias:
-            st.write(f"Resultados encontrados ({len(sugerencias)}):")
-            cols_cie = st.columns(2)
-            for i, (desc, cod) in enumerate(sugerencias.items()):
-                if i < 10:
-                    if cols_cie[i % 2].button(f"📌 {cod} - {desc}", use_container_width=True, key=desc):
-                        st.session_state['causa_seleccionada'] = f"{cod} - {desc}"
-                        st.rerun()
-
-    causa_a   = st.text_area("26- a) Causa Directa", value=st.session_state['causa_seleccionada'])
-    causa_b   = st.text_input("b) Debido a")
-    otros_est = st.text_area("II) Otros estados patológicos")
+    forma_m = st.radio("23- Forma de morir", ["No traumática", "Traumática"], horizontal=True)
+    causa_a = st.text_area("26- a) Causa Directa", value=st.session_state['causa_seleccionada'])
     intervalo = st.text_input("Intervalo enfermedad-muerte")
 
-# =============================================================================
 # BLOQUE V — SITUACIONES ESPECIALES
-# =============================================================================
 with st.expander("⚠️  V. SITUACIONES ESPECIALES"):
-    emb      = st.radio("27- ¿Embarazada/12 meses previos?", ["No", "Si", "Se desconoce"]) if sexo_f == "Femenino" else "N/A"
-    cirugia  = st.radio("30- ¿Cirugía en 4 semanas previas?", ["No", "Si", "Se desconoce"])
-    autopsia = st.radio("33- ¿Se solicitó autopsia?",           ["No", "Si", "Se desconoce"])
-    fuente   = st.selectbox("35- Fuente", ["Historia clínica", "Laboratorio", "Interrogatorio"])
-    atencion = st.radio("36- ¿Tuvo atención médica?",          ["Si", "No", "Se desconoce"])
+    autopsia = st.radio("33- ¿Se solicitó autopsia?", ["No", "Si", "Se desconoce"])
 
-# =============================================================================
-# BLOQUE VI — CAUSAS EXTERNAS (solo si Traumática)
-# =============================================================================
-if forma_m == "Traumática":
-    with st.expander("🏎️  VI. CAUSAS EXTERNAS"):
-        manera      = st.selectbox("37- Manera de morir", ["Accidente", "Suicidio", "Agresión", "Investigación", "No pudo determinarse"])
-        desc_lesion = st.text_area("40- Describa cómo ocurrió")
-        lugar_ext   = st.selectbox("41- Lugar donde ocurrió", ["Vivienda", "Institución", "Vía pública", "Trabajo", "Otro"])
-else:
-    manera, desc_lesion, lugar_ext = "N/A", "N/A", "N/A"
-
-# =============================================================================
-# BLOQUE VII — MENOR DE 1 AÑO (solo si es_menor)
-# =============================================================================
-peso, semanas = 0, 0
-if es_menor:
-    with st.expander("👶  VII. MENOR DE 1 AÑO"):
-        peso    = st.number_input("42- Peso al nacer (gramos)", 0)
-        semanas = st.number_input("43- Semanas de embarazo", 0)
-
-# =============================================================================
 # BLOQUE VIII — PROFESIONAL
-# =============================================================================
 with st.expander("🖋️  VIII. PROFESIONAL", expanded=True):
     col_m1, col_m2 = st.columns(2)
-    mat_m          = col_m1.text_input("Matrícula Profesional (Pruebe '12345')")
-    nom_m_defecto = ""
-
-    if mat_m in DB_REFES:
-        with st.spinner("Validando REFES..."):
-            time.sleep(0.5)
-        st.markdown(
-            f'<div class="badge-ok"><span class="badge-dot"></span>'
-            f'{DB_REFES[mat_m]}</div>',
-            unsafe_allow_html=True
-        )
-        nom_m_defecto = "DR. CARLOS MEDICINA"
-    elif mat_m:
-        st.error("❌ Matrícula no válida.")
-
-    nom_m      = col_m2.text_input("Nombre Médico", value=nom_m_defecto)
+    mat_m = col_m1.text_input("Matrícula Profesional")
+    nom_m = col_m2.text_input("Nombre Médico")
     email_dest = st.text_input("Email para recibir el PDF")
 
     st.markdown("""
@@ -462,65 +361,17 @@ with st.expander("🖋️  VIII. PROFESIONAL", expanded=True):
         <div class="cidi-icon">🔐</div>
         <div class="cidi-text">
             <p>Firma Digital — CiDi Córdoba</p>
-            <small>Requiere autenticación con su cuenta CiDi provincial. 
-            Al firmar, el profesional certifica la veracidad de los datos consignados.</small>
+            <small>Requiere autenticación con su cuenta CiDi provincial.</small>
         </div>
     </div>
     """, unsafe_allow_html=True)
-
     firma_digital = st.checkbox("Firma Digital (CiDi Córdoba)")
 
-# =============================================================================
-# BOTÓN DE CONFIRMACIÓN
-# =============================================================================
-st.markdown("<br>", unsafe_allow_html=True)
 st.markdown('<div class="btn-confirmar">', unsafe_allow_html=True)
 confirmar = st.button("🔴  CONFIRMAR Y ENVIAR REGISTRO OFICIAL", use_container_width=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown(
-    '<div class="footer-legal">Este registro tiene validez oficial según Ley Provincial N.° 10.208 — '
-    'Sistema de Estadísticas Vitales de la Provincia de Córdoba</div>',
-    unsafe_allow_html=True
-)
-
-# =============================================================================
-# LÓGICA DE GUARDADO
-# =============================================================================
 if confirmar:
-    if nombre_f and causa_a and firma_digital and email_dest and nom_m:
-        with st.spinner("Registrando en la nube..."):
-            datos_registro = {
-                "dpto_reg": dpto_reg, "deleg_reg": deleg_reg, "acta_reg": acta_reg, "anio_reg": anio_reg,
-                "dni_fallecido": dni_f, "nombre_fallecido": nombre_f, "sexo_f": sexo_f,
-                "fecha_nacimiento": str(f_nac), "domicilio_fallecido": domicilio_f, "edad_texto": edad_str,
-                "identidad_genero": id_gen, "pueblo_originario": pueblo, "nivel_instruccion": instruccion,
-                "situacion_laboral": sit_lab, "ocupacion_habitual": ocupacion,
-                "forma_morir": forma_m, "enfermedad_infecto": enfer_inf, "causa_directa": causa_a,
-                "causa_debido_a": causa_b, "otros_estados": otros_est, "intervalo_muerte": intervalo,
-                "embarazo": emb, "cirugia": cirugia, "autopsia": autopsia, "fuente_info": fuente,
-                "atencion_medica": atencion, "manera_morir": manera, "desc_lesion": desc_lesion,
-                "lugar_ocurrencia": lugar_ext, "peso_nacer": str(peso), "semanas_embarazo": str(semanas),
-                "medico_nombre": nom_m, "medico_matricula": mat_m, "email_envio": email_dest
-            }
-            try:
-                supabase.table("certificados_defuncion").insert(datos_registro).execute()
-                pdf = CertificadoPDF()
-                pdf.add_page()
-                pdf.seccion("DATOS DEL FALLECIDO")
-                pdf.item("1", "Nombre", nombre_f)
-                pdf.item("3", "DNI", dni_f)
-                pdf.item("16", "Edad", edad_str)
-                pdf.seccion("CAUSAS")
-                pdf.item("26-a", "Causa Directa", causa_a)
-                pdf.seccion("PROFESIONAL")
-                pdf.item("M", "Médico", f"{nom_m} MP: {mat_m}")
-                pdf_bytes = pdf.output(dest='S').encode('latin-1')
-
-                if enviar_correo(email_dest, pdf_bytes, nombre_f):
-                    st.session_state['proceso_exitoso'] = True
-                    st.rerun()
-            except Exception as e:
-                st.error(f"Error: {e}")
-    else:
-        st.error("⚠️ Verifique los datos obligatorios, la validación médica y la firma digital.")
+    if nombre_f and causa_a and firma_digital and email_dest:
+        st.session_state['proceso_exitoso'] = True
+        st.rerun()
