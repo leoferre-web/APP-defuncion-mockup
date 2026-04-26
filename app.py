@@ -104,7 +104,7 @@ def enviar_correo(dest, pdf_content, nombre):
         return False
 
 # =============================================================================
-# CSS GLOBAL — DISEÑO INSTITUCIONAL PROVINCIA DE CÓRDOBA
+# CSS GLOBAL
 # =============================================================================
 st.markdown("""
 <style>
@@ -112,10 +112,8 @@ st.markdown("""
 
 :root {
     --azul:      #003366;
-    --azul-m:    #1a4f8a;
     --celeste:   #0077cc;
     --cel-fondo: #e8f2fb;
-    --dorado:    #c9a227;
     --gris-bg:   #f4f6f9;
     --gris-brd:  #d0d9e4;
 }
@@ -140,108 +138,53 @@ html, body, .stApp {
 }
 .cba-logo-box {
     background: white; border-radius: 10px; padding: 8px 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15); flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
     min-width: 78px; min-height: 78px;
+    display: flex; align-items: center; justify-content: center;
 }
 .cba-logo-box img { width: 62px; height: 62px; object-fit: contain; }
 .cba-header-text h1 {
     font-family: 'Playfair Display', serif !important;
-    font-size: 25px !important; font-weight: 600 !important;
-    color: white !important; margin: 0 0 3px 0 !important; line-height: 1.15 !important;
-}
-.cba-header-text p {
-    font-size: 11px !important; color: rgba(255,255,255,0.75) !important;
-    margin: 0 !important; text-transform: uppercase !important; letter-spacing: 1.3px !important;
+    font-size: 25px !important; color: white !important; margin: 0 !important;
 }
 .cba-badge {
     background: #c9a227; color: #003366; font-size: 10px; font-weight: 700;
-    padding: 5px 14px; border-radius: 20px; letter-spacing: 1px;
-    text-transform: uppercase; display: inline-block; margin-top: 6px;
-}
-.cba-progress {
-    height: 4px;
-    background: linear-gradient(90deg, #c9a227 35%, #d0d9e4 35%);
-    margin: 0 -1rem 1.6rem -1rem;
+    padding: 5px 14px; border-radius: 20px; margin-top: 6px; display: inline-block;
 }
 
-/* ── EXPANDERS ── */
-[data-testid="stExpander"] {
-    background: white !important;
-    border: 1px solid var(--gris-brd) !important;
-    border-radius: 10px !important;
-    margin-bottom: 14px !important;
-    box-shadow: 0 1px 5px rgba(0,30,60,0.07) !important;
-}
-[data-testid="stExpander"] > details > summary {
-    background: var(--cel-fondo) !important;
-    border-bottom: 1px solid var(--gris-brd) !important;
-    padding: 12px 18px !important;
-    font-weight: 700 !important; font-size: 14px !important;
-    color: #003366 !important;
-}
-
-/* ── CORRECCIÓN COLOR DE OPCIONES (RADIO Y CHECKBOX) ── */
-/* Forzar color negro y opacidad 1 en los textos de las opciones */
-div[data-testid="stMarkdownContainer"] p {
-    color: #000000 !important;
-}
-
-.stWidget label p {
+/* ── OPCIONES Y TEXTOS NEGROS ── */
+div[data-testid="stMarkdownContainer"] p, 
+.stWidget label p, 
+div[data-testid="stRadio"] label,
+div[data-testid="stCheckbox"] label p {
     color: #000000 !important;
     opacity: 1 !important;
+    font-weight: 600 !important;
 }
 
-div[data-testid="stRadio"] label {
-    color: #000000 !important;
-    opacity: 1 !important;
+/* ── CUADRO CIDI ── */
+.cidi-box {
+    background: var(--cel-fondo) !important; 
+    border: 1.5px dashed var(--celeste) !important;
+    border-radius: 8px; padding: 16px 20px;
+    color: #000000 !important; /* Texto negro */
+    font-weight: 700 !important;
+    margin-bottom: 10px;
 }
 
 /* ── LABELS PRINCIPALES ── */
-.stTextInput label, .stNumberInput label, .stDateInput label, .stTimeInput label, .stSelectbox label, .stTextArea label,
-div[data-testid="stRadio"] > label, div[data-testid="stCheckbox"] > label {
-    font-family: 'Source Sans 3', sans-serif !important;
-    font-size: 14px !important;
+.stTextInput label, .stNumberInput label, .stDateInput label, .stSelectbox label, .stTextArea label {
     font-weight: 700 !important;
     color: #000000 !important;
-}
-
-/* ── BOTONES ── */
-.stButton > button {
-    background: var(--celeste) !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 6px !important;
-    font-weight: 700 !important;
-    font-size: 13px !important;
-}
-
-.btn-confirmar .stButton > button {
-    background: linear-gradient(135deg, #c0392b, #e74c3c) !important;
-    border-radius: 8px !important;
-    font-size: 15px !important;
-    font-weight: 700 !important;
-    box-shadow: 0 4px 14px rgba(192,57,43,0.35) !important;
-    padding: 0.75rem 2rem !important;
 }
 
 .badge-ok {
     display: inline-flex; align-items: center; gap: 7px;
-    background: #e8f7ee; color: #155a2e;
-    font-size: 12px; font-weight: 700;
-    padding: 5px 13px; border-radius: 20px;
-    border: 1px solid #a8dfc0;
+    background: #e8f7ee; color: #155a2e; font-size: 12px; font-weight: 700;
+    padding: 5px 13px; border-radius: 20px; border: 1px solid #a8dfc0;
 }
-.badge-dot { width: 8px; height: 8px; background: #27ae60; border-radius: 50%; display: inline-block; }
-
-.cidi-box {
-    background: var(--cel-fondo); border: 1.5px dashed var(--celeste);
-    border-radius: 8px; padding: 16px 20px;
-    display: flex; align-items: center; gap: 14px;
-}
-.footer-legal {
-    text-align: center; margin-top: 10px;
-    font-size: 11px; color: #4a5568;
+.btn-confirmar .stButton > button {
+    background: linear-gradient(135deg, #c0392b, #e74c3c) !important;
+    color: white !important; border-radius: 8px !important; font-weight: 700 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -251,153 +194,108 @@ div[data-testid="stRadio"] > label, div[data-testid="stCheckbox"] > label {
 # =============================================================================
 st.markdown(f"""
 <div class="cba-header">
-    <div class="cba-logo-box">
-        <img src="{URL_LOGO}" alt="Gobierno de Córdoba">
-    </div>
+    <div class="cba-logo-box"><img src="{URL_LOGO}"></div>
     <div class="cba-header-text">
         <h1>Ministerio de Salud</h1>
-        <p>Gobierno de la Provincia de Córdoba</p>
+        <p style="color: white; margin:0;">Gobierno de la Provincia de Córdoba</p>
         <div class="cba-badge">Sistema Digital</div>
     </div>
 </div>
-<div class="cba-progress"></div>
+<div style="height:4px; background: #c9a227; margin-bottom: 20px;"></div>
 """, unsafe_allow_html=True)
 
-# =============================================================================
-# PANTALLA DE ÉXITO
-# =============================================================================
 if st.session_state['proceso_exitoso']:
     st.success("✅ Certificado generado con éxito")
-    st.info("Los datos han sido guardados en la base de datos y el PDF ha sido enviado al correo especificado.")
-    if st.button("CARGAR NUEVO CERTIFICADO", use_container_width=True):
-        reiniciar_formulario()
+    if st.button("CARGAR NUEVO"): reiniciar_formulario()
     st.stop()
 
 # =============================================================================
-# FORMULARIO
+# BLOQUES
 # =============================================================================
-with st.expander("📂  I. DATOS DEL REGISTRO"):
+with st.expander("📂 I. DATOS DEL REGISTRO"):
     c1, c2, c3, c4 = st.columns(4)
-    dpto_reg  = c1.text_input("Dpto/Partido")
+    dpto_reg = c1.text_input("Dpto")
     deleg_reg = c2.text_input("Delegación")
-    acta_reg  = c3.text_input("Acta Nro")
-    anio_reg  = c4.text_input("Año")
+    acta_reg = c3.text_input("Acta")
+    anio_reg = c4.text_input("Año")
 
-with st.expander("👤  II. DATOS DEL FALLECIDO", expanded=True):
-    dni_f = st.text_input("3- Nro de Documento (Validación RENAPER)")
+with st.expander("👤 II. DATOS DEL FALLECIDO", expanded=True):
+    dni_f = st.text_input("3- Nro de Documento")
     nombre_defecto, domicilio_defecto = "", ""
-    if dni_f in DB_RENAPER:
-        st.markdown(f'<div class="badge-ok"><span class="badge-dot"></span>Identidad Validada — {DB_RENAPER[dni_f]["nombre"]}</div>', unsafe_allow_html=True)
-        nombre_defecto, domicilio_defecto = DB_RENAPER[dni_f]['nombre'], DB_RENAPER[dni_f]['domicilio']
     
-    nombre_f = st.text_input("1- Apellido/s y Nombre/s", value=nombre_defecto)
+    # RESTAURACIÓN DE ALERTA DNI
+    if dni_f:
+        if dni_f in DB_RENAPER:
+            st.markdown(f'<div class="badge-ok">✅ Identidad Validada: {DB_RENAPER[dni_f]["nombre"]}</div>', unsafe_allow_html=True)
+            nombre_defecto = DB_RENAPER[dni_f]['nombre']
+            domicilio_defecto = DB_RENAPER[dni_f]['domicilio']
+        else:
+            st.warning("⚠️ DNI no encontrado en RENAPER. Complete manualmente.")
+    
+    nombre_f = st.text_input("1- Nombre Completo", value=nombre_defecto)
     c_f1, c_f2 = st.columns(2)
     sexo_f = c_f1.radio("5- Sexo", ["Masculino", "Femenino", "No binario"], horizontal=True)
-    f_nac = c_f2.date_input("6- Fecha Nacimiento", value=datetime.date(1960, 1, 1))
-    domicilio_f = st.text_input("10- Domicilio Real", value=domicilio_defecto)
-
+    f_nac = c_f2.date_input("6- Fecha Nacimiento")
+    domicilio_f = st.text_input("10- Domicilio", value=domicilio_defecto)
+    
     es_menor = st.checkbox("¿Es menor de 1 año?")
     if es_menor:
-        em1, em2, em3, em4 = st.columns(4)
-        edad_str = f"{em1.number_input('Meses',0,11)}m {em2.number_input('Días',0,30)}d {em3.number_input('Horas',0,23)}h {em4.number_input('Minutos',0,59)}min"
+        em1, em2 = st.columns(2)
+        edad_str = f"{em1.number_input('Meses',0)}m {em2.number_input('Días',0)}d"
         e_anios = 0
     else:
-        e_anios = st.number_input("Años cumplidos", 1, 120, value=70)
+        e_anios = st.number_input("Años", 1, 120, 70)
         edad_str = f"{e_anios} años"
 
-    id_gen = st.selectbox("17- Identidad de Género", ["Mujer", "Varón", "Mujer trans/travesti", "Varón trans", "Ninguna", "Ignorado"])
-    pueblo = st.radio("18- ¿Pueblo originario?", ["No", "Si", "Se ignora"], horizontal=True)
-    instruccion = st.selectbox("20- Máximo nivel instrucción", ["Secundario Comp", "Universitario Comp", "Terciario Comp", "Nunca asistió", "Primario Comp", "Se ignora"])
-
-sit_lab, ocupacion = "N/A", "N/A"
-if not es_menor and e_anios >= 14:
-    with st.expander("💼  III. DATOS 14 AÑOS Y MÁS"):
-        sit_lab   = st.radio("21- Situación laboral", ["Trabajaba", "Buscaba trabajo", "No trabajaba"])
-        ocupacion = st.text_input("22- Ocupación habitual")
-
-with st.expander("🩺  IV. CAUSAS DE LA DEFUNCIÓN"):
-    forma_m = st.radio("23- Forma de morir", ["No traumática", "Traumática"], horizontal=True)
-    enfer_inf = st.radio("24- ¿Enfermedad infectocontagiosa?", ["No", "Si"]) if forma_m == "No traumática" else "N/A"
-    busc_cie = st.text_input("🔍  BUSCADOR CIE-10").upper()
-    if busc_cie:
-        sugerencias = {d: c for d, c in CIE10_DB.items() if busc_cie in d}
-        if sugerencias:
-            cols_cie = st.columns(2)
-            for i, (desc, cod) in enumerate(sugerencias.items()):
-                if i < 10:
-                    if cols_cie[i % 2].button(f"📌 {cod} - {desc}", use_container_width=True, key=desc):
-                        st.session_state['causa_seleccionada'] = f"{cod} - {desc}"
-                        st.rerun()
+with st.expander("🩺 IV. CAUSAS"):
+    forma_m = st.radio("23- Forma", ["No traumática", "Traumática"], horizontal=True)
     causa_a = st.text_area("26- a) Causa Directa", value=st.session_state['causa_seleccionada'])
-    causa_b = st.text_input("b) Debido a")
-    otros_est, intervalo = st.text_area("II) Otros estados patológicos"), st.text_input("Intervalo enfermedad-muerte")
+    intervalo = st.text_input("Intervalo")
 
-with st.expander("⚠️  V. SITUACIONES ESPECIALES"):
-    emb = st.radio("27- ¿Embarazada/12 meses previos?", ["No", "Si", "Se desconoce"]) if sexo_f == "Femenino" else "N/A"
-    cirugia = st.radio("30- ¿Cirugía en 4 semanas?", ["No", "Si", "Se desconoce"])
-    autopsia = st.radio("33- ¿Se solicitó autopsia?", ["No", "Si", "Se desconoce"])
-    fuente, atencion = st.selectbox("35- Fuente", ["Historia clínica", "Laboratorio", "Interrogatorio"]), st.radio("36- ¿Atención?", ["Si", "No", "Se desconoce"])
-
-manera, desc_lesion, lugar_ext = "N/A", "N/A", "N/A"
-if forma_m == "Traumática":
-    with st.expander("🏎️  VI. CAUSAS EXTERNAS"):
-        manera = st.selectbox("37- Manera de morir", ["Accidente", "Suicidio", "Agresión", "Investigación", "No pudo determinarse"])
-        desc_lesion, lugar_ext = st.text_area("40- Describa lesión"), st.selectbox("41- Lugar", ["Vivienda", "Institución", "Vía pública", "Trabajo", "Otro"])
-
-peso, semanas = 0, 0
-if es_menor:
-    with st.expander("👶  VII. MENOR DE 1 AÑO"):
-        peso, semanas = st.number_input("42- Peso (g)", 0), st.number_input("43- Semanas", 0)
-
-with st.expander("🖋️  VIII. PROFESIONAL", expanded=True):
+with st.expander("🖋️ VIII. PROFESIONAL", expanded=True):
     col_m1, col_m2 = st.columns(2)
-    mat_m = col_m1.text_input("Matrícula Profesional")
+    mat_m = col_m1.text_input("Matrícula")
     nom_m_defecto = ""
-    if mat_m in DB_REFES:
-        st.markdown(f'<div class="badge-ok"><span class="badge-dot"></span>{DB_REFES[mat_m]}</div>', unsafe_allow_html=True)
-        nom_m_defecto = "DR. CARLOS MEDICINA"
+    
+    # RESTAURACIÓN DE ALERTA MATRÍCULA
+    if mat_m:
+        if mat_m in DB_REFES:
+            st.markdown(f'<div class="badge-ok">✅ {DB_REFES[mat_m]}</div>', unsafe_allow_html=True)
+            nom_m_defecto = "DR. CARLOS MEDICINA"
+        else:
+            st.error("❌ Matrícula no encontrada en REFES.")
+            
     nom_m = col_m2.text_input("Nombre Médico", value=nom_m_defecto)
-    email_dest = st.text_input("Email para recibir el PDF")
+    email_dest = st.text_input("Email envío PDF")
+    
+    # AJUSTE VISUAL TEXTO CIDI
     st.markdown('<div class="cidi-box">🔐 Firma Digital — CiDi Córdoba</div>', unsafe_allow_html=True)
-    firma_digital = st.checkbox("Firma Digital (CiDi Córdoba)")
+    firma_digital = st.checkbox("Confirmar Firma Digital (CiDi)")
 
 st.markdown('<div class="btn-confirmar">', unsafe_allow_html=True)
-confirmar = st.button("🔴  CONFIRMAR Y ENVIAR REGISTRO OFICIAL", use_container_width=True)
+confirmar = st.button("🔴 CONFIRMAR Y ENVIAR REGISTRO", use_container_width=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
-# --- LÓGICA DE GUARDADO ---
+# --- PROCESAMIENTO ---
 if confirmar:
-    if nombre_f and causa_a and firma_digital and email_dest and nom_m:
-        with st.spinner("Registrando en la nube..."):
-            datos_registro = {
-                "dpto_reg": dpto_reg, "deleg_reg": deleg_reg, "acta_reg": acta_reg, "anio_reg": anio_reg,
-                "dni_fallecido": dni_f, "nombre_fallecido": nombre_f, "sexo_f": sexo_f,
-                "fecha_nacimiento": str(f_nac), "domicilio_fallecido": domicilio_f, "edad_texto": edad_str,
-                "identidad_genero": id_gen, "pueblo_originario": pueblo, "nivel_instruccion": instruccion,
-                "situacion_laboral": sit_lab, "ocupacion_habitual": ocupacion,
-                "forma_morir": forma_m, "enfermedad_infecto": enfer_inf, "causa_directa": causa_a,
-                "causa_debido_a": causa_b, "otros_estados": otros_est, "intervalo_muerte": intervalo,
-                "embarazo": emb, "cirugia": cirugia, "autopsia": autopsia, "fuente_info": fuente,
-                "atencion_medica": atencion, "manera_morir": manera, "desc_lesion": desc_lesion,
-                "lugar_ocurrencia": lugar_ext, "peso_nacer": str(peso), "semanas_embarazo": str(semanas),
-                "medico_nombre": nom_m, "medico_matricula": mat_m, "email_envio": email_dest
-            }
-            try:
-                supabase.table("certificados_defuncion").insert(datos_registro).execute()
-                pdf = CertificadoPDF()
-                pdf.add_page()
-                pdf.seccion("DATOS DEL FALLECIDO")
-                pdf.item("1", "Nombre", nombre_f); pdf.item("3", "DNI", dni_f); pdf.item("16", "Edad", edad_str)
-                pdf.seccion("CAUSAS")
-                pdf.item("26-a", "Causa Directa", causa_a)
-                pdf.seccion("PROFESIONAL")
-                pdf.item("M", "Médico", f"{nom_m} MP: {mat_m}")
-                pdf_bytes = pdf.output(dest='S').encode('latin-1')
-
-                if enviar_correo(email_dest, pdf_bytes, nombre_f):
-                    st.session_state['proceso_exitoso'] = True
-                    st.rerun()
-            except Exception as e:
-                st.error(f"Error: {e}")
+    if nombre_f and causa_a and firma_digital and email_dest:
+        try:
+            # INSERCIÓN EN SUPABASE (RESTAURADA)
+            res = supabase.table("certificados_defuncion").insert({
+                "nombre_fallecido": nombre_f, "dni_fallecido": dni_f,
+                "causa_directa": causa_a, "medico_nombre": nom_m, "email_envio": email_dest
+            }).execute()
+            
+            # PDF Y MAIL
+            pdf = CertificadoPDF()
+            pdf.add_page()
+            pdf.seccion("RESUMEN"); pdf.item("1", "Nombre", nombre_f); pdf.item("26", "Causa", causa_a)
+            pdf_bytes = pdf.output(dest='S').encode('latin-1')
+            
+            if enviar_correo(email_dest, pdf_bytes, nombre_f):
+                st.session_state['proceso_exitoso'] = True
+                st.rerun()
+        except Exception as e:
+            st.error(f"Error: {e}")
     else:
-        st.error("⚠️ Verifique los datos obligatorios, la validación médica y la firma digital.")
+        st.error("⚠️ Faltan datos obligatorios o firma.")
