@@ -209,7 +209,11 @@ div[data-testid="stCheckbox"] > label,
 }
 
 .stRadio div[role="radiogroup"] label,
-.stCheckbox label {
+.stRadio div[role="radiogroup"] label p,
+.stRadio div[role="radiogroup"] label span,
+.stCheckbox label,
+.stCheckbox label p,
+.stCheckbox label span {
     color: #111827 !important;
     font-size: 13px !important;
     font-weight: 600 !important;
