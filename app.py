@@ -336,7 +336,7 @@ with st.expander("📂  I. DATOS DEL REGISTRO"):
 # =============================================================================
 with st.expander("👤  II. DATOS DEL FALLECIDO", expanded=True):
 
-    dni_f = st.text_input("3- Nro de Documento (Validación RENAPER)")
+    dni_f = st.text_input("3- Nro de Documento (Validación RENAPER)Probar con 123")
     nombre_defecto, domicilio_defecto = "", ""
 
     if dni_f in DB_RENAPER:
